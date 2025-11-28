@@ -155,7 +155,7 @@ public class EquipamentoServiceIntegrationTest {
 
     @Test
     @DisplayName("Deve retornar exception quando id nao existe")
-    void deveRetornarExcepitonQuandoIdNaoExiste() throws SQLException {
+    void deveRetornarExceptionQuandoIdNaoExiste() throws SQLException {
         RuntimeException e = assertThrows(RuntimeException.class, () -> {
             equipamentoService.buscarEquipamentoPorId(999L);
         });
