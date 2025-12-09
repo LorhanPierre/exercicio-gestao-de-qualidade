@@ -19,7 +19,7 @@ public class FalhaServiceImpl implements FalhaService{
             if(equipamento != null){
                 var falhaRepository = new FalhaRepositoryImpl();
                     if(falha.getCriticidade().equalsIgnoreCase("CRITICA")){
-                        buscarEquipamento.atualizarStatusEquipamento(equipamento);
+                        buscarEquipamento.atualizarStatusEquipamento("EM_MANUTENCAO",falha.getEquipamentoId());
                     }
                 falha.setStatus("ABERTA");
                 return falhaRepository.registrarFalha(falha);

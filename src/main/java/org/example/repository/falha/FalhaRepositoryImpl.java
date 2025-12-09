@@ -6,6 +6,7 @@ import org.example.model.Falha;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,6 +75,55 @@ public class FalhaRepositoryImpl implements FalhaRepository {
             }
         }
         return falhas;
+    }
+
+    public void AtualizarFalha(String newStatus, Long id) throws SQLException{
+
+        String query = "UPDATE Falha SET status = ? WHERE id = ?";
+
+        try(Connection conn = Conexao.conectar();
+        PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
+
+            stmt.setString(1, newStatus);
+            stmt.setLong(2, id);
+            stmt.executeUpdate();
+        }
+    }
+
+    public Falha buscarFalhaPorId(Long id) throws SQLException {
+
+        Falha falha = new Falha();
+
+        String query = """
+                SELECT
+                id,
+                equipamentoId,
+                dataHoraOcorrencia,
+                descricao,
+                criticidade,
+                status,
+                tempoParadaHoras
+                FROM Falha
+                WHERE id = ?
+                """;
+
+        try(Connection conn = Conexao.conectar();
+        PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)){
+
+            stmt.setLong(1, id);
+
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()){
+                falha.setId(rs.getLong("id"));
+                falha.setEquipamentoId(rs.getLong("equipamentoId"));
+                falha.setDataHoraOcorrencia(rs.getTimestamp("dataHoraOcorrencia").toLocalDateTime());
+                falha.setDescricao(rs.getString("descricao"));
+                falha.setCriticidade(rs.getString("criticidade"));
+                falha.setStatus(rs.getString("status"));
+                falha.setTempoParadaHoras(rs.getBigDecimal("tempoParadaHoras"));
+            }
+        }
+        return falha;
     }
 }
 

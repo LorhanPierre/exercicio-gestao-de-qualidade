@@ -10,5 +10,5 @@ public interface EquipamentoRepository {
 
     Equipamento buscarEquipamentoPorId(Long idEquipamento) throws SQLException;
 
-    void atualizarStatusEquipamento(Equipamento equipamento) throws SQLException;
+    void atualizarStatusEquipamento(String newStatus, Long id) throws SQLException;
 }

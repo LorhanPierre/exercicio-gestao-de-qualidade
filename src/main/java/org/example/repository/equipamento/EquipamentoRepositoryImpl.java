@@ -1,12 +1,15 @@
 package org.example.repository.equipamento;
 
 import org.example.database.Conexao;
+import org.example.dto.EquipamentoContagemFalhasDTO;
 import org.example.model.Equipamento;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EquipamentoRepositoryImpl implements EquipamentoRepository {
 
@@ -67,7 +70,7 @@ public class EquipamentoRepositoryImpl implements EquipamentoRepository {
     }
 
     @Override
-    public void atualizarStatusEquipamento(Equipamento equipamento) throws SQLException{
+    public void atualizarStatusEquipamento(String newStatus, Long id) throws SQLException{
 
         String query = """
                 UPDATE Equipamento
@@ -77,10 +80,44 @@ public class EquipamentoRepositoryImpl implements EquipamentoRepository {
 
         try(Connection conn = Conexao.conectar();
         PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)){
-            stmt.setString(1,"EM_MANUTENCAO");
-            stmt.setLong(2, equipamento.getId());
+            stmt.setString(1,newStatus);
+            stmt.setLong(2, id);
             stmt.executeUpdate();
         }
+    }
+
+    public List<EquipamentoContagemFalhasDTO> gerarRelatorioManutencaoPreventiva(int contagemMinimaFalhas) throws SQLException {
+
+        List<EquipamentoContagemFalhasDTO> list = new ArrayList<>();
+
+        String query = """
+                SELECT
+                e.id,
+                e.nome,
+                count(f.equipamentoId) AS "TotalDeFalhas"
+                FROM Falha f
+                JOIN Equipamento e
+                ON f.equipamentoId = e.id
+                GROUP BY equipamentoId
+                """;
+
+        try(Connection conn = Conexao.conectar();
+        PreparedStatement stmt = conn.prepareStatement(query)){
+
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()){
+                if(rs.getInt("TotalDeFalhas") >= contagemMinimaFalhas){
+                    Long idEquipamento = rs.getLong("id");
+                    String nomeEquipamento = rs.getString("nome");
+                    int totalDeFalhas = rs.getInt("TotalDeFalhas");
+
+                    var contagemDeFalhaDeEquipamento = new EquipamentoContagemFalhasDTO(idEquipamento,nomeEquipamento,totalDeFalhas);
+                    list.add(contagemDeFalhaDeEquipamento);
+                }
+            }
+        }
+        return list;
     }
 }
 

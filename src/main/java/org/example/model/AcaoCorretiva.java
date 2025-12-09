@@ -16,6 +16,7 @@ REFERENCES Falha(id)
 ON DELETE RESTRICT -- Impede excluir uma falha se ela tiver ações corretivas
 );*/
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 
 public class AcaoCorretiva {
